@@ -1,0 +1,8 @@
+services:
+  tsidp:
+    build: .
+    image: tsidp:latest
+    container_name: tsidp
+    hostname: tsidp
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY}
