@@ -9,8 +9,12 @@ or pin it to a specific release of Tailscale from their [repo](https://github.co
 
 ## Config
 
-Currently, no configuration is really possible.
-Feel free to open an issue if you want a specific config implemented.
+|          env           | required |                                      description                                       | default value |
+| :--------------------: | :------: | :------------------------------------------------------------------------------------: | :-----------: |
+|       TS_AUTHKEY       |   true   | Tailscale authkey. You can get it from https://login.tailscale.com/admin/settings/keys |    <empty>    |
+|      TS_USERSPACE      |  false   |                               Use userspace networking.                                |     false     |
+|        VERBOSE         |  false   |                                Get verbose log output.                                 |     false     |
+| TAILSCALE_USE_WIP_CODE |  false   |                Code is work in progress. Is needed for `tsidp` to work!                |       1       |
 
 ## Compose
 

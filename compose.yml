@@ -2,7 +2,10 @@ services:
   tsidp:
     build: .
     image: tsidp:latest
+    # image: ghcr.io/arunoruto/tsidp:latest
     container_name: tsidp
     hostname: tsidp
     environment:
       TS_AUTHKEY: ${TS_AUTHKEY}
+      TS_USERSPACE: false
+      VERBOSE: false
