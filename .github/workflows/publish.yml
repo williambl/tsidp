@@ -36,6 +36,7 @@ jobs:
         with:
           repository: tailscale/tailscale
           ref: ${{ env.TAILSCALE_VERSION }}
+          path: tailscale
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
