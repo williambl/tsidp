@@ -1,11 +1,14 @@
 name: Publish Docker image
 
 on:
+  pull_request_target:
+    types:
+      - closed
   # push:
   #   branches: [main]
-  schedule:
-    # Runs "every Sunday at 5 in the morning" (see https://crontab.guru)
-    - cron: "0 5 * * 0"
+  # schedule:
+  #   # Runs "every Sunday at 5 in the morning" (see https://crontab.guru)
+  #   - cron: "0 5 * * 0"
   workflow_dispatch:
 
 env:
@@ -15,6 +18,7 @@ env:
 jobs:
   push_to_registries:
     name: Push Docker image to multiple registries
+    # if: github.event.pull_request.merged == true && github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -27,7 +31,8 @@ jobs:
 
       - name: Get latest tailscale release tag
         run: |
-          TAILSCALE_VERSION=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest | jq -r '.tag_name')
+          # TAILSCALE_VERSION=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest | jq -r '.tag_name')
+          TAILSCALE_VERSION=$(cat ./tailscale/VERSION.txt)
           echo "Latest tailscale version: $TAILSCALE_VERSION"
           echo TAILSCALE_VERSION=$TAILSCALE_VERSION >> $GITHUB_ENV
 
