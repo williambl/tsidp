@@ -36,7 +36,8 @@ jobs:
       - name: Get latest tailscale release tag
         run: |
           # TAILSCALE_VERSION=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest | jq -r '.tag_name')
-          TAILSCALE_VERSION=$(cat ./tailscale/VERSION.txt)
+          # TAILSCALE_VERSION=$(cat ./tailscale/VERSION.txt)
+          TAILSCALE_VERSION="${{ github.event.workflow_run.jobs.update-submodule.outputs.latest_tag }}"
           echo "Latest tailscale version: $TAILSCALE_VERSION"
           echo TAILSCALE_VERSION=$TAILSCALE_VERSION >> $GITHUB_ENV
 
