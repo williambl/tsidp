@@ -1,28 +1,41 @@
 name: Publish Docker image
 
 on:
-  # pull_request_target:
-  #   types:
-  #     - closed
-  # push:
-  #   branches: [main]
-  # schedule:
-  #   # Runs "every Sunday at 5 in the morning" (see https://crontab.guru)
-  #   - cron: "0 5 * * 0"
   workflow_run:
     workflows: [Check Submodule Tags]
     types:
       - completed
-  workflow_dispatch:
+  # workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  check_update:
+    name: Has the submodule been updated
+    runs-on: ubuntu-latest
+    outputs:
+      latest_tag: ${{ steps.extract.outputs.latest_tag }}
+      submodule_updated: ${{ steps.extract.outputs.submodule_updated }}
+    steps:
+      - name: Download submodule info data
+        uses: actions/download-artifact@v4
+        with:
+          name: submodule-data
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract information
+        id: extract
+        run: |
+          echo "latest_tag=$(cat latest_tag)" >> $GITHUB_OUTPUT
+          echo "submodule_updated=$(cat submodule_updated)" >> $GITHUB_OUTPUT
+
   push_to_registries:
     name: Push Docker image to multiple registries
-    # if: github.event.pull_request.merged == true && github.event.pull_request.user.login == 'dependabot[bot]'
+    needs: [check_update]
+    if: ${{ needs.check_update.outputs.submodule_updated == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -32,21 +45,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
-
-      - name: Get latest tailscale release tag
-        run: |
-          # TAILSCALE_VERSION=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest | jq -r '.tag_name')
-          # TAILSCALE_VERSION=$(cat ./tailscale/VERSION.txt)
-          TAILSCALE_VERSION="${{ github.event.workflow_run.jobs.update-submodule.outputs.latest_tag }}"
-          echo "Latest tailscale version: $TAILSCALE_VERSION"
-          echo TAILSCALE_VERSION=$TAILSCALE_VERSION >> $GITHUB_ENV
-
-      - name: Check out tailscale repo
-        uses: actions/checkout@v4
         with:
-          repository: tailscale/tailscale
-          ref: ${{ env.TAILSCALE_VERSION }}
-          path: tailscale
+          submodules: true
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -71,10 +71,9 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          #tags: ${{ steps.meta.outputs.tags }}
           tags: |
             ${{ env.IMAGE_PATH }}:latest
-            ${{ env.IMAGE_PATH }}:${{ env.TAILSCALE_VERSION }}
+            ${{ env.IMAGE_PATH }}:${{ needs.check_update.outputs.latest_tag }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
