@@ -26,10 +26,27 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          cd tailscale
-          git fetch --tags
-          git checkout ${{ steps.get-tag.outputs.latest_tag }}
-          cd ..
-          git add tailscale
-          git commit -m "chore: update submodule to ${{ steps.get-tag.outputs.latest_tag }}"
-          git push
+
+          # Get current commit of the Tailscale submodule
+          CURRENT_COMMIT=$(git submodule status --recursive | grep "tailscale" | awk '{print $1}')
+
+          # Get commit hash of the latest tag
+          LATEST_COMMIT=$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}^{}" | awk '{print $1}')
+
+          echo "current=$CURRENT_COMMIT"
+          echo "latest=$LATEST_COMMIT"
+
+          if [ "$CURRENT_COMMIT" != "$LATEST_COMMIT" ]; then
+            cd tailscale
+            git fetch --tags
+            git checkout ${{ steps.get-tag.outputs.latest_tag }}
+            cd ..
+            git add tailscale
+            git commit -m "chore: update submodule to ${{ steps.get-tag.outputs.latest_tag }}"
+            git push
+
+            echo "submodule_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tailscale submodule already up-to-date."
+            echo "submodule_updated=false" >> $GITHUB_OUTPUT
+          fi
