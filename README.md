@@ -4,7 +4,7 @@
 > This repository is automated! Please look at the package versions
 > [here](https://github.com/arunoruto/tsidp/pkgs/container/tsidp).
 > If the code hasn't been touched for a long time, don't worry;
-> containers are built every Sunday morning against the newest release of Tailscale.
+> containers are built against the newest release of Tailscale.
 
 I saw the [video about tsidp](https://www.youtube.com/watch?v=BdQ-Gz6bs3g),
 I found it a bit sad that there was no docker container to try it out.
@@ -35,5 +35,5 @@ or even better, fork the repo and open a PR with a fix ;)
 
 ## TODO
 
-- [ ] Save the current newest version in cache. If there wasn't a new release, don't rebuild.
-      -> If this is implemented, daily checks could be implemented!
+- [x]] Save the current newest version in cache. If there wasn't a new release, don't rebuild.
+  -> If this is implemented, daily checks could be implemented!
