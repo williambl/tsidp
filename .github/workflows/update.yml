@@ -37,7 +37,10 @@ jobs:
           echo "current=$CURRENT_COMMIT"
           echo "latest=$LATEST_COMMIT"
 
-          if [ "$CURRENT_COMMIT" != "$LATEST_COMMIT" ]; then
+          if [ -z $LATEST_COMMIT ]; then
+            echo "::error title={Latest commit hash error}::{Could not determine the latest commit hash, please check for errors.}"
+            exit 1
+          elif [ "$CURRENT_COMMIT" != "$LATEST_COMMIT" ]; then
             cd tailscale
             git fetch --tags
             git checkout ${{ steps.get-tag.outputs.latest_tag }}
