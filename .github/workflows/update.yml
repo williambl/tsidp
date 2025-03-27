@@ -60,6 +60,9 @@ jobs:
             git push
 
             echo "submodule_updated=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Workflow was manually triggered! Forcing image build!"
+            echo "submodule_updated=true" >> $GITHUB_OUTPUT
           else
             echo "Tailscale submodule already up-to-date."
             echo "submodule_updated=false" >> $GITHUB_OUTPUT
