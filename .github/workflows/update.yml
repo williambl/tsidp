@@ -31,14 +31,24 @@ jobs:
           # Get current commit of the Tailscale submodule
           CURRENT_COMMIT=$(git submodule status --recursive | grep "tailscale" | awk '{print $1}')
 
+          NUMBER_OF_TAGS=$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}*" | wc -l)
+
           # Get commit hash of the latest tag
-          LATEST_COMMIT=$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}^{}" | awk '{print $1}')
+          if [[ $NUMBER_OF_TAGS == 2 ]]; then
+            LATEST_COMMIT=$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}^{}" | awk '{print $1}')
+          elif [[ $NUMBER_OF_TAGS == 1 ]]; then
+            LATEST_COMMIT=$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}" | awk '{print $1}')
+          else
+            LATEST_COMMIT=$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}^{}" | awk '{print $1}')
+            echo "::debug::Number of lines is weird... Check the output below"
+            git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${{ steps.get-tag.outputs.latest_tag }}*"          fi
+          fi
 
           echo "current=$CURRENT_COMMIT"
           echo "latest=$LATEST_COMMIT"
 
           if [ -z $LATEST_COMMIT ]; then
-            echo "::error title={Latest commit hash error}::{Could not determine the latest commit hash, please check for errors.}"
+            echo "::error title=Latest commit hash error::Could not determine the latest commit hash. Please check for errors."
             exit 1
           elif [ "$CURRENT_COMMIT" != "$LATEST_COMMIT" ]; then
             cd tailscale
